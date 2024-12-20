@@ -6,6 +6,13 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import Registar from "../pages/Registar";
+import DashboardLayout from "../layout/DashboardLayout";
+import PrivateRoute from "./PrivateRoute";
+import Overview from "../components/dashboard/Overview";
+import MyProducts from "../components/dashboard/MyProducts";
+import AddProducts from "../components/dashboard/AddProducts";
+import SellerRoutes from "./SellerRoutes";
+
 
 export const router = createBrowserRouter([
     {
@@ -38,4 +45,24 @@ export const router = createBrowserRouter([
       }
     ]
     },
+
+    {
+      path:'/dashboard',
+      element:<PrivateRoute><DashboardLayout/></PrivateRoute>,
+      children:[
+        {
+          path:'/dashboard/overview',
+          element:<Overview/>
+        },
+        //selller routes
+        {
+          path:'/dashboard/products',
+          element:<SellerRoutes><MyProducts/></SellerRoutes>
+        },
+        {
+          path:'/dashboard/add-products',
+          element:<SellerRoutes><AddProducts/></SellerRoutes>
+        },
+      ]
+    }
   ]);

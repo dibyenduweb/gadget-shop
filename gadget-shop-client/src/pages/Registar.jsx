@@ -4,6 +4,9 @@ import useAuth from "../hooks/useAuth"; // Correct import of the useAuth hook
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom"; // For navigation after successful registration
 import GoogleLogin from "../components/login-registration/GoogleLogin"; // Import GoogleLogin component
+import axios from "axios";
+import Swal from 'sweetalert2';
+
 
 const Register = () => {
   const { createUser } = useAuth();
@@ -17,15 +20,32 @@ const Register = () => {
   } = useForm();
 
   // Function to handle form submission
-  const onSubmit = async (data) => {
-    try {
-      await createUser(data.email, data.password); // Create user using the createUser function
-      console.log("User created successfully");
-      navigate("/"); // Navigate to home page after successful registration
-    } catch (error) {
-      console.error("Error creating user:", error.message); // Handle any errors (e.g., email already in use)
-      alert("Error: " + error.message); // Display error message
-    }
+  const onSubmit =  (data) => {
+    const email = data.email;
+    const role = data.role;
+    const status = role == "buyer" ? "approved" : "pending"
+    const wishlist = []
+
+    const userData= {email, role, status, wishlist}
+
+  createUser(data.email, data.password)
+      .then(()=>{
+          axios.post('http://localhost:5000/users', userData).then((res)=>{
+          
+            if(res.data.insertedId){
+              Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Registration sucses full",
+                showConfirmButton: false,
+                timer: 1500
+              });
+              navigate("/");
+            }
+          })
+      })
+      navigate("/");
+      console.log(userData);
   };
 
   return (
@@ -103,8 +123,9 @@ const Register = () => {
               <label className="label">
                 <span className="label-text">Role</span>
               </label>
-              <select className="select select-bordered w-full max-w-xs"
-              {...register('role', {required:true})}
+              <select
+                className="select select-bordered w-full max-w-xs"
+                {...register("role", { required: true })}
               >
                 <option disabled selected>
                   Select Your Rol
@@ -113,13 +134,9 @@ const Register = () => {
                 <option value="seller">Seller</option>
               </select>
 
-              {
-                errors.role && (
-                  <p className="text-red-500">
-                    you must selet a role
-                  </p>
-  )
-              }
+              {errors.role && (
+                <p className="text-red-500">you must selet a role</p>
+              )}
             </div>
 
             <div className="form-control mt-6">
